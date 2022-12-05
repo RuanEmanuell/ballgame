@@ -3,8 +3,15 @@ import 'dart:math';
 import 'package:flame/components.dart';
 import 'package:flame/experimental.dart';
 import 'package:flame/game.dart';
+import 'package:provider/provider.dart';
+
+import '../controller/controller.dart';
 
 class BallGame extends FlameGame with HasDraggableComponents {
+  var context;
+
+  BallGame({required this.context});
+
   late SpriteComponent ball;
   late SpriteComponent player;
   late SpriteComponent line;
@@ -12,6 +19,12 @@ class BallGame extends FlameGame with HasDraggableComponents {
   late double ballAcelleration;
 
   var random = Random();
+
+  void kickBall() {
+    ballAcelleration = player.angle;
+    ball.x = ball.x - ballAcelleration;
+    ball.y = ball.y + ballAcelleration;
+  }
 
   @override
   Future<void> onLoad() async {
@@ -34,8 +47,6 @@ class BallGame extends FlameGame with HasDraggableComponents {
     final lineSize = Vector2(size[0] / 3, size[1] / 1.5);
     line = SpriteComponent(
         size: lineSize, sprite: lineSprite, position: Vector2(370, 300), anchor: Anchor.center);
-
-    add(line);
   }
 
   @override
@@ -50,16 +61,14 @@ class BallGame extends FlameGame with HasDraggableComponents {
 
     line.angle = player.angle;
 
-    ballAcelleration = player.angle;
-
-    ball.x = ball.x - ballAcelleration;
-    ball.y = ball.y + ballAcelleration;
+    if (player.angle <= 0.5) {
+      kickBall();
+    }
   }
 
   @override
   void onDragUpdate(DragUpdateEvent event) {
     super.onDragUpdate(event);
-    print(event);
     player.angle = player.angle + event.delta[1] / 20 + event.delta[0] / 20;
   }
 }

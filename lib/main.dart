@@ -20,6 +20,10 @@ void main() async {
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return GameWidget(game: BallGame());
+    return Scaffold(body: Consumer<Controller>(builder: (context, value, child) {
+      return Stack(children: [
+        GameWidget(game: BallGame(context: context)),
+      ]);
+    }));
   }
 }
