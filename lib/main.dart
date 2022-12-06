@@ -22,7 +22,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(body: Consumer<Controller>(builder: (context, value, child) {
       return Stack(children: [
-        GameWidget(game: BallGame(context: context)),
+        GameWidget(game: BallGame(context: context, value: value)),
       ]);
     }));
   }
