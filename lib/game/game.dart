@@ -1,13 +1,11 @@
-import 'dart:math';
 
 import 'package:flame/collisions.dart';
 import 'package:flame/components.dart';
 import 'package:flame/experimental.dart';
 import 'package:flame/game.dart';
+import 'package:flame/parallax.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
-import '../controller/controller.dart';
 
 class BallGame extends FlameGame with HasDraggableComponents, HasCollisionDetection {
   var context;
@@ -43,13 +41,17 @@ class BallGame extends FlameGame with HasDraggableComponents, HasCollisionDetect
     value.line = SpriteComponent(
         size: lineSize, sprite: lineSprite, position: Vector2(370, 300), anchor: Anchor.center);
 
-    camera.followComponent(value.ball);
+    value.grass = await ParallaxComponent.load([
+      ParallaxImageData("grass.png"),
+    ],
+        size: Vector2(size[0], size[1] / 3),
+        position: Vector2(0, 300),
+        baseVelocity: Vector2(0, 0),
+        velocityMultiplierDelta: Vector2.all(2));
+
+    add(value.grass);
   }
 
-  @override
-  void render(canvas) {
-    super.render(canvas);
-  }
 
   @override
   void update(double dt) {
@@ -79,10 +81,6 @@ class Player extends SpriteComponent with CollisionCallbacks {
     debugMode = true;
   }
 
-  @override
-  void onCollision(Set<Vector2> intersectionPoints, PositionComponent other) {
-    super.onCollision(intersectionPoints, other);
-  }
 }
 
 class Ball extends SpriteComponent with CollisionCallbacks {

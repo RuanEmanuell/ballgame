@@ -7,26 +7,33 @@ class Controller extends ChangeNotifier {
   late SpriteComponent ball;
   late SpriteComponent player;
   late SpriteComponent line;
+  late ParallaxComponent grass;
 
   int kickable = 0;
 
   late double ballAcelleration;
+  late int accelerationController;
 
   var random = Random();
 
   void kickBall() async {
     ballAcelleration = player.angle;
-    for (var i = 0; i < ballAcelleration.abs() * 20; i++) {
-      await Future.delayed(Duration(milliseconds: 100), () {});
-      ball.x = ball.x - ballAcelleration * 10;
-      ball.y = ball.y + ballAcelleration * 10;
+    accelerationController = (ballAcelleration.abs() * 20).toInt();
+
+    grass.parallax?.baseVelocity = Vector2(accelerationController.toDouble(), 0);
+
+    for (var i = 0; i < accelerationController; i++) {
+      await Future.delayed(const Duration(milliseconds: 100), () {});
+      ball.x = ball.x - ballAcelleration * 5;
+      ball.y = ball.y + ballAcelleration * 5;
     }
-    Future.delayed(Duration(milliseconds: (ballAcelleration * 20).toInt()), () async {
-      for (var i = 0; i < ballAcelleration.abs() * 20; i++) {
-        await Future.delayed(Duration(milliseconds: 100), () {});
-        ball.x = ball.x - ballAcelleration * 10;
-        ball.y = ball.y - ballAcelleration * 10;
+    await Future.delayed(Duration(milliseconds: accelerationController), () async {
+      for (var i = 0; i < accelerationController; i++) {
+        await Future.delayed(const Duration(milliseconds: 150), () {});
+        ball.x = ball.x - ballAcelleration * 5;
+        ball.y = ball.y - ballAcelleration * 5;
       }
     });
+    grass.parallax?.baseVelocity = Vector2.zero();
   }
 }
