@@ -1,11 +1,9 @@
-
 import 'package:flame/collisions.dart';
 import 'package:flame/components.dart';
 import 'package:flame/experimental.dart';
 import 'package:flame/game.dart';
 import 'package:flame/parallax.dart';
 import 'package:flutter/material.dart';
-
 
 class BallGame extends FlameGame with HasDraggableComponents, HasCollisionDetection {
   var context;
@@ -15,15 +13,11 @@ class BallGame extends FlameGame with HasDraggableComponents, HasCollisionDetect
 
   @override
   Future<void> onLoad() async {
-    final ballSprite = await Sprite.load("ball.png");
-    final ballSize = Vector2(size[0] / 5, size[1] / 3);
-    value.ball = Ball(value: value)
-      ..size = ballSize
-      ..sprite = ballSprite
-      ..position = Vector2(200, 350)
-      ..anchor = Anchor.center;
+    value.crowd = await ParallaxComponent.load([
+      ParallaxImageData("crowd.png"),
+    ], size: size, baseVelocity: Vector2(0, 0), velocityMultiplierDelta: Vector2.all(2));
 
-    add(value.ball);
+    add(value.crowd);
 
     final whichPlayer = value.random.nextInt(4) + 1;
     final playerSprite = await Sprite.load("player$whichPlayer.png");
@@ -31,32 +25,60 @@ class BallGame extends FlameGame with HasDraggableComponents, HasCollisionDetect
     value.player = Player(value: value)
       ..size = playerSize
       ..sprite = playerSprite
-      ..position = Vector2(50, 300)
+      ..position = Vector2(50, 275)
       ..anchor = Anchor.center;
 
     add(value.player);
+
+    value.grass = await ParallaxComponent.load([
+      ParallaxImageData("grass.png"),
+    ],
+        size: Vector2(size[0], size[1] / 3),
+        position: Vector2(0, 325),
+        baseVelocity: Vector2(0, 0),
+        velocityMultiplierDelta: Vector2.all(2));
+
+    add(value.grass);
+
+    final ballSprite = await Sprite.load("ball.png");
+    final ballSize = Vector2(size[0] / 5, size[1] / 3);
+    value.ball = Ball(value: value)
+      ..size = ballSize
+      ..sprite = ballSprite
+      ..position = Vector2(200, 360)
+      ..anchor = Anchor.center;
+
+    add(value.ball);
 
     final lineSprite = await Sprite.load("line.png");
     final lineSize = Vector2(size[0] / 3, size[1] / 1.5);
     value.line = SpriteComponent(
         size: lineSize, sprite: lineSprite, position: Vector2(370, 300), anchor: Anchor.center);
 
-    value.grass = await ParallaxComponent.load([
-      ParallaxImageData("grass.png"),
-    ],
-        size: Vector2(size[0], size[1] / 3),
-        position: Vector2(0, 300),
-        baseVelocity: Vector2(0, 0),
-        velocityMultiplierDelta: Vector2.all(2));
+    value.camera = camera;
 
-    add(value.grass);
+    final enemySprite = await Sprite.load(
+        whichPlayer != 4 ? "player${whichPlayer + 1}.png" : "player${whichPlayer - 1}.png");
+    value.enemy = Enemy(value: value)
+      ..size = playerSize
+      ..sprite = enemySprite
+      ..position = Vector2(2000, 275)
+      ..anchor = Anchor.center;
+
+    add(value.enemy);
   }
-
 
   @override
   void update(double dt) {
     super.update(dt);
     value.line.angle = value.player.angle;
+
+    if (value.kickable == 2 && value.cameraPosition >= 200) {
+      value.cameraPosition = value.cameraPosition - 10;
+      camera.followVector2(Vector2(value.cameraPosition, 200));
+    } else {
+      value.kickable = 0;
+    }
   }
 
   @override
@@ -77,10 +99,19 @@ class Player extends SpriteComponent with CollisionCallbacks {
   Future<void> onLoad() async {
     await super.onLoad();
     add(CircleHitbox());
-    debugColor = Colors.blue;
-    debugMode = true;
   }
+}
 
+class Enemy extends SpriteComponent with CollisionCallbacks {
+  dynamic value;
+
+  Enemy({required this.value});
+
+  @override
+  Future<void> onLoad() async {
+    await super.onLoad();
+    add(CircleHitbox());
+  }
 }
 
 class Ball extends SpriteComponent with CollisionCallbacks {
@@ -92,7 +123,6 @@ class Ball extends SpriteComponent with CollisionCallbacks {
   Future<void> onLoad() async {
     await super.onLoad();
     add(CircleHitbox());
-    debugColor = Colors.red;
     debugMode = true;
   }
 

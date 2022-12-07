@@ -4,7 +4,6 @@ import 'package:flutter/services.dart';
 import "package:provider/provider.dart";
 import "controller/controller.dart";
 
-
 import 'game/game.dart';
 
 void main() async {
