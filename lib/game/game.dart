@@ -9,6 +9,8 @@ class BallGame extends FlameGame with HasDraggableComponents, HasCollisionDetect
   var context;
   var value;
 
+  var distancer = 0;
+
   BallGame({required this.context, required this.value});
 
   @override
@@ -19,33 +21,33 @@ class BallGame extends FlameGame with HasDraggableComponents, HasCollisionDetect
 
     add(value.crowd);
 
-    final whichPlayer = value.random.nextInt(4) + 1;
-    final playerSprite = await Sprite.load("player$whichPlayer.png");
-    final playerSize = Vector2(size[0] / 3, size[1] / 1.5);
-    value.player = Player(value: value)
-      ..size = playerSize
-      ..sprite = playerSprite
-      ..position = Vector2(50, 275)
-      ..anchor = Anchor.center;
-
-    add(value.player);
-
     value.grass = await ParallaxComponent.load([
       ParallaxImageData("grass.png"),
     ],
-        size: Vector2(size[0], size[1] / 3),
+        size: Vector2(size[0], size[1] / 4.5),
         position: Vector2(0, 325),
         baseVelocity: Vector2(0, 0),
         velocityMultiplierDelta: Vector2.all(2));
 
     add(value.grass);
 
+    final whichPlayer = value.random.nextInt(4) + 1;
+    final playerSprite = await Sprite.load("player$whichPlayer.png");
+    final playerSize = Vector2(size[0] / 5, size[1] / 2.5);
+    value.player = Player(value: value)
+      ..size = playerSize
+      ..sprite = playerSprite
+      ..position = Vector2(50, 320)
+      ..anchor = Anchor.center;
+
+    add(value.player);
+
     final ballSprite = await Sprite.load("ball.png");
-    final ballSize = Vector2(size[0] / 5, size[1] / 3);
+    final ballSize = Vector2(size[0] / 7.5, size[1] / 5);
     value.ball = Ball(value: value)
       ..size = ballSize
       ..sprite = ballSprite
-      ..position = Vector2(200, 360)
+      ..position = Vector2(100, 370)
       ..anchor = Anchor.center;
 
     add(value.ball);
@@ -57,23 +59,27 @@ class BallGame extends FlameGame with HasDraggableComponents, HasCollisionDetect
 
     value.camera = camera;
 
-    final enemySprite = await Sprite.load(
-        whichPlayer != 4 ? "player${whichPlayer + 1}.png" : "player${whichPlayer - 1}.png");
-    value.enemy = Enemy(value: value)
-      ..size = playerSize
-      ..sprite = enemySprite
-      ..position = Vector2(2000, 275)
-      ..anchor = Anchor.center;
+    for (var i = 0; i < 2; i++) {
+      final enemySprite = await Sprite.load(
+          whichPlayer != 4 ? "player${whichPlayer + 1}.png" : "player${whichPlayer - 1}.png");
+      value.enemy = Enemy(value: value)
+        ..size = playerSize
+        ..sprite = enemySprite
+        ..position = Vector2((720 + distancer).toDouble(), 320)
+        ..anchor = Anchor.center;
 
-    add(value.enemy);
+      add(value.enemy);
+
+      distancer = distancer + 150;
+    }
   }
 
   @override
-  void update(double dt) {
+  void update(double dt) async {
     super.update(dt);
     value.line.angle = value.player.angle;
 
-    if (value.kickable == 2 && value.cameraPosition >= 200) {
+    if (value.kickable == 2 && value.cameraPosition >= 300) {
       value.cameraPosition = value.cameraPosition - 10;
       camera.followVector2(Vector2(value.cameraPosition, 200));
     } else {
@@ -100,6 +106,15 @@ class Player extends SpriteComponent with CollisionCallbacks {
     await super.onLoad();
     add(CircleHitbox());
   }
+
+  @override
+  void onCollision(Set<Vector2> intersectionPoints, PositionComponent other) {
+    super.onCollision(intersectionPoints, other);
+    if (value.player.angle < -0.1) {
+      value.kickable = 1;
+      value.kickBall();
+    }
+  }
 }
 
 class Enemy extends SpriteComponent with CollisionCallbacks {
@@ -112,6 +127,16 @@ class Enemy extends SpriteComponent with CollisionCallbacks {
     await super.onLoad();
     add(CircleHitbox());
   }
+
+  @override
+  void onCollision(Set<Vector2> intersectionPoints, PositionComponent other) {
+    super.onCollision(intersectionPoints, other);
+    if (value.ball.x < value.enemy.x) {
+      value.ball.x = value.enemy.x / 1.1;
+    } else {
+      value.ball.x = value.enemy.x * 1.1;
+    }
+  }
 }
 
 class Ball extends SpriteComponent with CollisionCallbacks {
@@ -123,15 +148,5 @@ class Ball extends SpriteComponent with CollisionCallbacks {
   Future<void> onLoad() async {
     await super.onLoad();
     add(CircleHitbox());
-    debugMode = true;
-  }
-
-  @override
-  void onCollision(Set<Vector2> intersectionPoints, PositionComponent other) {
-    super.onCollision(intersectionPoints, other);
-    if (value.player.angle < -0.1) {
-      value.kickable = 1;
-      value.kickBall();
-    }
   }
 }

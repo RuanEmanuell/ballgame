@@ -12,7 +12,7 @@ class Controller extends ChangeNotifier {
   late ParallaxComponent crowd;
 
   late dynamic camera;
-  double cameraPosition = 2000.0;
+  double cameraPosition = 800.0;
 
   int kickable = 2;
 
@@ -28,27 +28,18 @@ class Controller extends ChangeNotifier {
     grass.parallax?.baseVelocity = Vector2(accelerationController * 2.toDouble(), 0);
     crowd.parallax?.baseVelocity = Vector2(accelerationController / 2.toDouble(), 0);
 
-    if (ballAcelleration <= -0.6) {
-      camera.zoom++;
-    }
-
     for (var i = 0; i < accelerationController; i++) {
-      await Future.delayed(const Duration(milliseconds: 100), () {});
-      ball.x = ball.x - ballAcelleration * 5;
-      ball.y = ball.y + ballAcelleration * 5;
+      await Future.delayed(const Duration(milliseconds: 25), () {});
+      ball.x = ball.x - ballAcelleration / 3;
+      ball.y = ball.y + ballAcelleration / 3;
       camera.followVector2(Vector2(ball.x, 200));
-    }
-    if (ballAcelleration <= -0.6) {
-      Future.delayed(const Duration(milliseconds: 200), () {
-        camera.zoom--;
-      });
     }
 
     await Future.delayed(Duration(milliseconds: accelerationController), () async {
       for (var i = 0; i < accelerationController; i++) {
-        await Future.delayed(const Duration(milliseconds: 125), () {});
-        ball.x = ball.x - ballAcelleration * 5;
-        ball.y = ball.y - ballAcelleration * 5;
+        await Future.delayed(const Duration(milliseconds: 40), () {});
+        ball.x = ball.x - ballAcelleration / 3;
+        ball.y = ball.y - ballAcelleration / 3;
         camera.followVector2(Vector2(ball.x, 200));
       }
     });
