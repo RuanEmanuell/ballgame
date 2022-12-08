@@ -4,6 +4,7 @@ import 'package:flame/experimental.dart';
 import 'package:flame/game.dart';
 import 'package:flame/parallax.dart';
 import 'package:flame/rendering.dart';
+import 'package:flame/sprite.dart';
 import 'package:flutter/material.dart';
 
 class BallGame extends FlameGame with HasDraggableComponents, HasCollisionDetection {
@@ -77,6 +78,21 @@ class BallGame extends FlameGame with HasDraggableComponents, HasCollisionDetect
       ..anchor = Anchor.center;
 
     add(value.ball);
+
+    final spriteSheet = SpriteSheet(image: await images.load("meter.png"), srcSize: Vector2(384, 384));
+
+    value.meter1 = spriteSheet.createAnimation(row: 0, stepTime: 0.1, from: 0, to: 1);
+    value.meter2 = spriteSheet.createAnimation(row: 0, stepTime: 0.1, from: 1, to: 2);
+    value.meter3 = spriteSheet.createAnimation(row: 0, stepTime: 0.1, from: 2, to: 3);
+    value.meter4 = spriteSheet.createAnimation(row: 0, stepTime: 0.1, from: 3, to: 4);
+
+    final meterSize = Vector2(size[0] / 6, size[1] / 2.5);
+    value.meter = Meter(value: value)
+      ..animation = value.meter1
+      ..size = meterSize
+      ..position = Vector2(150, 100);
+
+    add(value.meter);
   }
 
   @override
@@ -93,13 +109,27 @@ class BallGame extends FlameGame with HasDraggableComponents, HasCollisionDetect
   @override
   void onDragUpdate(DragUpdateEvent event) {
     super.onDragUpdate(event);
-    if (value.kickable < 1) {
+    if (value.kickable == 0) {
       value.player.angle = value.player.angle + event.delta[1] / 20 + event.delta[0] / 20;
+      switch (value.player.angle.round()) {
+        case 0:
+          value.meter.animation = value.meter1;
+          break;
+        case 1:
+          value.meter.animation = value.meter2;
+          break;
+        case 2:
+          value.meter.animation = value.meter3;
+          break;
+        case 3:
+          value.meter.animation = value.meter4;
+          break;
+      }
     }
   }
 }
 
-class Player extends SpriteComponent with CollisionCallbacks {
+class Player extends SpriteComponent with CollisionCallbacks, HasGameRef {
   dynamic value;
 
   Player({required this.value});
@@ -114,8 +144,8 @@ class Player extends SpriteComponent with CollisionCallbacks {
   void onCollision(Set<Vector2> intersectionPoints, PositionComponent other) {
     super.onCollision(intersectionPoints, other);
     if (value.player.angle < -0.1) {
-      value.kickable = 1;
       value.kickBall();
+      value.kickable = 1;
     }
   }
 }
@@ -134,8 +164,8 @@ class Enemy extends SpriteComponent with CollisionCallbacks {
   @override
   Future<void> onCollision(Set<Vector2> intersectionPoints, PositionComponent other) async {
     super.onCollision(intersectionPoints, other);
-    while (value.ballAcelleration > 0.0) {
-      value.ballAcelleration = value.ballAcelleration - 200;
+    while (value.ballAcelleration > 100) {
+      value.ballAcelleration = value.ballAcelleration - 100;
     }
   }
 }
@@ -150,6 +180,12 @@ class Ball extends SpriteComponent with CollisionCallbacks {
     await super.onLoad();
     add(CircleHitbox()..isSolid = true);
   }
+}
+
+class Meter extends SpriteAnimationComponent {
+  dynamic value;
+
+  Meter({required this.value});
 }
 
 class Goal extends SpriteComponent with CollisionCallbacks {

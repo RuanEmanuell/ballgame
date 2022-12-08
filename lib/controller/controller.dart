@@ -8,8 +8,14 @@ class Controller extends ChangeNotifier {
   late SpriteComponent player;
   late SpriteComponent enemy;
   late SpriteComponent goal;
+  late SpriteAnimationComponent meter;
   late ParallaxComponent grass;
   late ParallaxComponent crowd;
+
+  late SpriteAnimation meter1;
+  late SpriteAnimation meter2;
+  late SpriteAnimation meter3;
+  late SpriteAnimation meter4;
 
   late dynamic camera;
   double cameraPosition = 800.0;
@@ -24,7 +30,6 @@ class Controller extends ChangeNotifier {
   void kickBall() async {
     ballAcelleration = player.angle;
     accelerationController = (ballAcelleration.abs() * 20).toInt();
-
     grass.parallax?.baseVelocity = Vector2(accelerationController * 2.toDouble(), 0);
     crowd.parallax?.baseVelocity = Vector2(accelerationController / 2.toDouble(), 0);
 
