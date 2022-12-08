@@ -3,6 +3,7 @@ import 'package:flame/components.dart';
 import 'package:flame/experimental.dart';
 import 'package:flame/game.dart';
 import 'package:flame/parallax.dart';
+import 'package:flame/rendering.dart';
 import 'package:flutter/material.dart';
 
 class BallGame extends FlameGame with HasDraggableComponents, HasCollisionDetection {
@@ -20,6 +21,16 @@ class BallGame extends FlameGame with HasDraggableComponents, HasCollisionDetect
     ], size: size, baseVelocity: Vector2(0, 0), velocityMultiplierDelta: Vector2.all(2));
 
     add(value.crowd);
+
+    final goalSprite = await Sprite.load("goal.png");
+    final goalSize = Vector2(size[0] / 1.6, size[1]);
+    value.goal = Goal(value: value)
+      ..size = goalSize
+      ..sprite = goalSprite
+      ..position = Vector2(1000, 200)
+      ..anchor = Anchor.center;
+
+    add(value.goal);
 
     value.grass = await ParallaxComponent.load([
       ParallaxImageData("grass.png"),
@@ -42,6 +53,21 @@ class BallGame extends FlameGame with HasDraggableComponents, HasCollisionDetect
 
     add(value.player);
 
+    value.camera = camera;
+    for (var i = 0; i < 2; i++) {
+      final enemySprite = await Sprite.load(
+          whichPlayer != 4 ? "player${whichPlayer + 1}.png" : "player${whichPlayer - 1}.png");
+      value.enemy = Enemy(value: value)
+        ..size = playerSize
+        ..sprite = enemySprite
+        ..position = Vector2((500 + distancer).toDouble(), 320)
+        ..anchor = Anchor.center;
+
+      add(value.enemy);
+
+      distancer = distancer + 150;
+    }
+
     final ballSprite = await Sprite.load("ball.png");
     final ballSize = Vector2(size[0] / 7.5, size[1] / 5);
     value.ball = Ball(value: value)
@@ -51,34 +77,11 @@ class BallGame extends FlameGame with HasDraggableComponents, HasCollisionDetect
       ..anchor = Anchor.center;
 
     add(value.ball);
-
-    final lineSprite = await Sprite.load("line.png");
-    final lineSize = Vector2(size[0] / 3, size[1] / 1.5);
-    value.line = SpriteComponent(
-        size: lineSize, sprite: lineSprite, position: Vector2(370, 300), anchor: Anchor.center);
-
-    value.camera = camera;
-
-    for (var i = 0; i < 2; i++) {
-      final enemySprite = await Sprite.load(
-          whichPlayer != 4 ? "player${whichPlayer + 1}.png" : "player${whichPlayer - 1}.png");
-      value.enemy = Enemy(value: value)
-        ..size = playerSize
-        ..sprite = enemySprite
-        ..position = Vector2((720 + distancer).toDouble(), 320)
-        ..anchor = Anchor.center;
-
-      add(value.enemy);
-
-      distancer = distancer + 150;
-    }
   }
 
   @override
   void update(double dt) async {
     super.update(dt);
-    value.line.angle = value.player.angle;
-
     if (value.kickable == 2 && value.cameraPosition >= 300) {
       value.cameraPosition = value.cameraPosition - 10;
       camera.followVector2(Vector2(value.cameraPosition, 200));
@@ -125,16 +128,14 @@ class Enemy extends SpriteComponent with CollisionCallbacks {
   @override
   Future<void> onLoad() async {
     await super.onLoad();
-    add(CircleHitbox());
+    add(CircleHitbox()..isSolid = true);
   }
 
   @override
-  void onCollision(Set<Vector2> intersectionPoints, PositionComponent other) {
+  Future<void> onCollision(Set<Vector2> intersectionPoints, PositionComponent other) async {
     super.onCollision(intersectionPoints, other);
-    if (value.ball.x < value.enemy.x) {
-      value.ball.x = value.enemy.x / 1.1;
-    } else {
-      value.ball.x = value.enemy.x * 1.1;
+    while (value.ballAcelleration > 0.0) {
+      value.ballAcelleration = value.ballAcelleration - 200;
     }
   }
 }
@@ -147,6 +148,26 @@ class Ball extends SpriteComponent with CollisionCallbacks {
   @override
   Future<void> onLoad() async {
     await super.onLoad();
-    add(CircleHitbox());
+    add(CircleHitbox()..isSolid = true);
+  }
+}
+
+class Goal extends SpriteComponent with CollisionCallbacks {
+  dynamic value;
+
+  Goal({required this.value});
+
+  @override
+  Future<void> onLoad() async {
+    await super.onLoad();
+    add(CircleHitbox()..isSolid = true);
+  }
+
+  @override
+  Future<void> onCollision(Set<Vector2> intersectionPoints, PositionComponent other) async {
+    super.onCollision(intersectionPoints, other);
+    while (value.ballAcelleration > 0.0) {
+      value.ballAcelleration = value.ballAcelleration - 20;
+    }
   }
 }

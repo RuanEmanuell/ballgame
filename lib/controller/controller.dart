@@ -7,7 +7,7 @@ class Controller extends ChangeNotifier {
   late SpriteComponent ball;
   late SpriteComponent player;
   late SpriteComponent enemy;
-  late SpriteComponent line;
+  late SpriteComponent goal;
   late ParallaxComponent grass;
   late ParallaxComponent crowd;
 
@@ -29,7 +29,7 @@ class Controller extends ChangeNotifier {
     crowd.parallax?.baseVelocity = Vector2(accelerationController / 2.toDouble(), 0);
 
     for (var i = 0; i < accelerationController; i++) {
-      await Future.delayed(const Duration(milliseconds: 25), () {});
+      await Future.delayed(const Duration(milliseconds: 20), () {});
       ball.x = ball.x - ballAcelleration / 3;
       ball.y = ball.y + ballAcelleration / 3;
       camera.followVector2(Vector2(ball.x, 200));
@@ -37,7 +37,7 @@ class Controller extends ChangeNotifier {
 
     await Future.delayed(Duration(milliseconds: accelerationController), () async {
       for (var i = 0; i < accelerationController; i++) {
-        await Future.delayed(const Duration(milliseconds: 40), () {});
+        await Future.delayed(const Duration(milliseconds: 25), () {});
         ball.x = ball.x - ballAcelleration / 3;
         ball.y = ball.y - ballAcelleration / 3;
         camera.followVector2(Vector2(ball.x, 200));
