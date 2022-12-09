@@ -1,3 +1,5 @@
+# Veja a versão em Português <a href="README.md">aqui</a>
+
 ## BallGame (nome provisório)
 
 Era (ou vai ser) um jogo estilo AngryBirds onde o objetivo do jogador é acertar a bola no gol passando pelos inimigos. Inspirado na Copa do Mundo de 2022.
