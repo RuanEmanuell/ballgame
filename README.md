@@ -12,4 +12,4 @@ You will need <a href="https://docs.flutter.dev/get-started/install">Flutter</a>
 
 ### Here are some images of the project running:
 
-Images still not available. The game assets and code are available
+Images still not available. The game temporary assets and code are available
