@@ -1,3 +1,5 @@
+# Veja a versão em Português <a href="README-ptbr.md">aqui</a>
+
 ## BallGame (temporary name)
 
 It was (or is) going to be an AngryBirds-like game with where the player objective is to score the ball in the goal passing by the enemies. Inspired by the 2022 World Cup.
@@ -10,4 +12,4 @@ You will need <a href="https://docs.flutter.dev/get-started/install">Flutter</a>
 
 ### Here are some images of the project running:
 
-Images still not available
+Images still not available. The game assets and code are available
